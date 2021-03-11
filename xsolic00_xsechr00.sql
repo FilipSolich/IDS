@@ -1,0 +1,9 @@
+drop table kocka;
+drop table hostitel;
+drop table teritorium;
+drop table vec;
+drop table rasa;
+drop table zivot;
+drop table vyskyt;
+drop table vlastnictvi;
+drop table propujcka;
