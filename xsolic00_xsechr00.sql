@@ -64,27 +64,27 @@ INCREMENT BY 1;
 -- Create tables
 CREATE TABLE kocka (
     id INT DEFAULT kocka_id_seq.NEXTVAL,
-    hlavni_jmeno VARCHAR2(30),
-    vzorek_kuze VARCHAR2(30), -- co ma byt vzorek kuze?
+    hlavni_jmeno VARCHAR(30),
+    vzorek_kuze VARCHAR(30), -- co ma byt vzorek kuze?
     barva_srsti INT,
-    rasa VARCHAR2(30)
+    rasa VARCHAR(30)
 );
 
 CREATE TABLE hostitel (
     id INT DEFAULT hostitel_id_seq.NEXTVAL,
-    jmeno VARCHAR2(30),
+    jmeno VARCHAR(30),
     vek INT,
-    pohlavi VARCHAR2(30),
-    pojmenovani_od_kocky VARCHAR2(30),
-    adresa VARCHAR2(100), -- melo by byt rozdeleno na ulice, cp, mesto, stat a psc?
+    pohlavi VARCHAR(30),
+    pojmenovani_od_kocky VARCHAR(30),
+    adresa VARCHAR(100), -- melo by byt rozdeleno na ulice, cp, mesto, stat a psc?
     kocka INT,
-    preferovana_rasa VARCHAR2(30)
+    preferovana_rasa VARCHAR(30)
 );
 
 CREATE TABLE rasa (
-    nazev VARCHAR2(30),
-    barva_oci VARCHAR2(30),
-    puvod VARCHAR2(50),
+    nazev VARCHAR(30),
+    barva_oci VARCHAR(30),
+    puvod VARCHAR(50),
     max_delka_tesaku INT
 );
 
@@ -95,11 +95,11 @@ CREATE TABLE rasa (
 -- Z stav muzeme udelat "ENUM" aby jsme splnili pozadavek na minimalne jeden CHECK
 CREATE TABLE zivot (
     id INT DEFAULT zivot_id_seq.NEXTVAL,
-    stav VARCHAR2(30) NOT NULL,
+    stav VARCHAR(30) NOT NULL,
     delka TIMESTAMP,
     zacatek DATE NOT NULL,
     konec DATE,
-    zpusob_smrti VARCHAR2(50),
+    zpusob_smrti VARCHAR(50),
     kocka INT NOT NULL,
     teritorium INT
 );
@@ -114,7 +114,7 @@ CREATE TABLE vyskyt (
 
 CREATE TABLE teritorium (
   id INT DEFAULT teritorium_id_seq.NEXTVAL,
-  druh VARCHAR2(30) NOT NULL,
+  druh VARCHAR(30) NOT NULL,
   kapacita_kocek INT NOT NULL,
   velikost INT NOT NULL,
   vyskyt INT NOT NULL,
@@ -124,7 +124,7 @@ CREATE TABLE teritorium (
 
 CREATE TABLE vec (
     id INT DEFAULT vec_id_seq.NEXTVAL,
-    druh VARCHAR2(30) NOT NULL,
+    druh VARCHAR(30) NOT NULL,
     pocet INT,
     teritorium INT NOT NULL,
     vlastnictvi INT NOT NULL
