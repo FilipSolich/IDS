@@ -1,12 +1,11 @@
 --
 -- xsolic00-xsechr00.sql
 --
--- Date:    1. 4. 2021
+-- Date:    3. 4. 2021
 -- Authors: Filip Solich <xsolic00@stud.fit.vutbr.cz>
 --          Marek Sechra <xsechr00@stud.fit.vutbr.cz>
 --
 
--- TODO pridat CHECK
 
 -- Drop everything
 DROP SEQUENCE kocka_id_seq;
@@ -75,7 +74,7 @@ CREATE TABLE kocka (
 CREATE TABLE hostitel (
     id INT DEFAULT hostitel_id_seq.NEXTVAL,
     jmeno VARCHAR(30),
-    vek INT,
+    vek INT CHECK (vek >= 18),
     pohlavi VARCHAR(30),
     jmeno_pro_kocku VARCHAR(30),
     ulice VARCHAR(100),
@@ -93,16 +92,11 @@ CREATE TABLE rasa (
     max_delka_tesaku INT
 );
 
--- Misto delky by bylo asi lepsi mit jen zacatek a konec ze ktereho se to da vypocitat
--- a nebo jen delku jako TIMESTAMP protoze v zadani je napsane delka zivota
--- a ne datum zacatku a datum konce.
-
--- Z stav muzeme udelat "ENUM" aby jsme splnili pozadavek na minimalne jeden CHECK
 CREATE TABLE zivot (
     id INT DEFAULT zivot_id_seq.NEXTVAL,
     stav VARCHAR(30) NOT NULL,
-    delka TIMESTAMP,
     zacatek TIMESTAMP NOT NULL,
+    konec TIMESTAMP,
     zpusob_smrti VARCHAR(50),
     kocka INT NOT NULL,
     teritorium INT
@@ -219,21 +213,19 @@ VALUES ('Inviduální',1,10);
 INSERT INTO teritorium(druh, kapacita_kocek, velikost)
 VALUES ('Komunistická',1948,6666);
 
--- !!! MUSI SE PRIDAT AZ PO TERITORIU
-
-INSERT INTO zivot (stav, delka, zacatek, zpusob_smrti, kocka, teritorium)
-VALUES ('Žije', NULL, TO_TIMESTAMP('12.12.2020 08:13:33', 'dd.mm.yyyy HH24:MI:SS'), NULL, 1, NULL);
-INSERT INTO zivot (stav, delka, zacatek, zpusob_smrti, kocka, teritorium)
-VALUES ('Nežije', TO_TIMESTAMP('12.1.1900 16:00:55', 'dd.mm.yyyy HH24:MI:SS'),
-    TO_TIMESTAMP('30.11.2020 12:22:22', 'dd.mm.yyyy HH24:MI:SS'), 'Utopeni', 1, 4);
-INSERT INTO zivot (stav, delka, zacatek, zpusob_smrti, kocka, teritorium)
-VALUES ('Žije', NULL, TO_TIMESTAMP('13.10.2019 15:54:59', 'dd.mm.yyyy HH24:MI:SS'), NULL, 4, NULL);
-INSERT INTO zivot (stav, delka, zacatek, zpusob_smrti, kocka, teritorium)
-VALUES ('Žije', NULL, TO_TIMESTAMP('20.11.2016 12:12:12', 'dd mm.yyyy HH24:MI:SS'), NULL, 3, NULL);
-INSERT INTO zivot (stav, delka, zacatek, zpusob_smrti, kocka, teritorium)
-VALUES ('Žije', NULL, TO_TIMESTAMP('3.8.2015 15:12:13', 'dd.mm.yyyy HH24:MI:SS'), NULL, 2, NULL);
-INSERT INTO zivot (stav, delka, zacatek, zpusob_smrti, kocka, teritorium)
-VALUES ('Žije', NULL, TO_TIMESTAMP('3.8.2015 15:12:13', 'dd.mm.yyyy HH24:MI:SS'), NULL, 5, NULL);
+INSERT INTO zivot (stav, zacatek, konec, zpusob_smrti, kocka, teritorium)
+VALUES ('Žije', TO_TIMESTAMP('12.12.2020 08:13:33', 'dd.mm.yyyy HH24:MI:SS'), NULL, NULL, 1, NULL);
+INSERT INTO zivot (stav, zacatek, konec, zpusob_smrti, kocka, teritorium)
+VALUES ('Nežije', TO_TIMESTAMP('30.11.2020 12:22:22', 'dd.mm.yyyy HH24:MI:SS'),
+    TO_TIMESTAMP('12.12.2020 08:13:32', 'dd.mm.yyyy HH24:MI:SS'), 'Utopeni', 1, 4);
+INSERT INTO zivot (stav, zacatek, konec, zpusob_smrti, kocka, teritorium)
+VALUES ('Žije', TO_TIMESTAMP('13.10.2019 15:54:59', 'dd.mm.yyyy HH24:MI:SS'), NULL, NULL, 4, NULL);
+INSERT INTO zivot (stav, zacatek, konec, zpusob_smrti, kocka, teritorium)
+VALUES ('Žije', TO_TIMESTAMP('20.11.2016 12:12:12', 'dd mm.yyyy HH24:MI:SS'), NULL, NULL, 3, NULL);
+INSERT INTO zivot (stav, zacatek, konec, zpusob_smrti, kocka, teritorium)
+VALUES ('Žije', TO_TIMESTAMP('3.8.2015 15:12:13', 'dd.mm.yyyy HH24:MI:SS'), NULL, NULL, 2, NULL);
+INSERT INTO zivot (stav, zacatek, konec, zpusob_smrti, kocka, teritorium)
+VALUES ('Žije', TO_TIMESTAMP('3.8.2015 15:12:13', 'dd.mm.yyyy HH24:MI:SS'), NULL, NULL, 5, NULL);
 
 INSERT INTO vyskyt(od, do, kocka, teritorium)
 VALUES (TO_TIMESTAMP('3.8.2015 15:12:13', 'dd.mm.yyyy HH24:MI:SS'),NULL, 5, 4);
@@ -292,12 +284,18 @@ VALUES(TO_TIMESTAMP('17.3.2011 00:00:00', 'dd.mm.yyyy HH24:MI:SS'),
 INSERT INTO propujcka(od,do,vlastnictvi,hostitel)
 VALUES(TO_TIMESTAMP('24.10.2019 16:15:14', 'dd.mm.yyyy HH24:MI:SS'),
     TO_TIMESTAMP('25.10.2019 16:15:14', 'dd.mm.yyyy HH24:MI:SS'),1,1);
+
+
 COMMIT;
 
 
 -- SELECT
-SELECT * FROM kocka;
-SELECT * FROM rasa;
-SELECT * FROM hostitel;
---SELECT * FROM zivot;
---SELECT * FROM vyskyt;
+-- SELECT * FROM kocka;
+-- SELECT * FROM rasa;
+-- SELECT * FROM hostitel;
+-- SELECT * FROM zivot;
+-- SELECT * FROM vyskyt;
+-- SELECT * FROM teritorium;
+-- SELECT * FROM vec;
+-- SELECT * FROM propujcka;
+-- SELECT * FROM vlastnictvi;
