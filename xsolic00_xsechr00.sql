@@ -120,18 +120,14 @@ CREATE TABLE teritorium (
     id INT DEFAULT teritorium_id_seq.NEXTVAL,
     druh VARCHAR(30) NOT NULL,
     kapacita_kocek INT NOT NULL,
-    velikost INT NOT NULL,
-    vyskyt INT NOT NULL,
-    zivot INT NOT NULL,
-    vec INT NOT NULL
+    velikost INT NOT NULL
 );
 
 CREATE TABLE vec (
     id INT DEFAULT vec_id_seq.NEXTVAL,
     druh VARCHAR(30) NOT NULL,
     pocet INT,
-    teritorium INT NOT NULL,
-    vlastnictvi INT NOT NULL
+    teritorium INT NOT NULL
 );
 
 CREATE TABLE vlastnictvi (
@@ -139,7 +135,6 @@ CREATE TABLE vlastnictvi (
     od TIMESTAMP NOT NULL,
     do TIMESTAMP,
     vec INT NOT NULL,
-    propujcka INT NOT NULL,
     kocka INT NOT NULL
 );
 
@@ -172,14 +167,9 @@ ALTER TABLE zivot ADD CONSTRAINT FK_zivot_kocka FOREIGN KEY (kocka) REFERENCES k
 ALTER TABLE zivot ADD CONSTRAINT FK_zivot_teritorium FOREIGN KEY (teritorium) REFERENCES teritorium ON DELETE CASCADE;
 ALTER TABLE vyskyt ADD CONSTRAINT FK_vyskyt_kocka FOREIGN KEY (kocka) REFERENCES kocka ON DELETE CASCADE;
 ALTER TABLE vyskyt ADD CONSTRAINT FK_vyskyt_teritorium FOREIGN KEY (teritorium) REFERENCES teritorium ON DELETE CASCADE;
-ALTER TABLE teritorium ADD CONSTRAINT FK_teritorium_vyskyt FOREIGN KEY (vyskyt) REFERENCES vyskyt;
-ALTER TABLE teritorium ADD CONSTRAINT FK_teritorium_zivot FOREIGN KEY (zivot) REFERENCES  zivot;
-ALTER TABLE teritorium ADD CONSTRAINT FK_teritorium_vec FOREIGN KEY (vec) REFERENCES vec;
 ALTER TABLE vec ADD CONSTRAINT FK_vec_teritorium FOREIGN KEY (teritorium) REFERENCES teritorium ON DELETE CASCADE;
-ALTER TABLE vec ADD CONSTRAINT FK_vec_vlastnictvi FOREIGN KEY (vlastnictvi) REFERENCES vlastnictvi ON DELETE CASCADE;
 ALTER TABLE vlastnictvi ADD CONSTRAINT  FK_vlastnictvi_vec FOREIGN KEY (vec) REFERENCES vec ON DELETE CASCADE;
 ALTER TABLE vlastnictvi ADD CONSTRAINT FK_vlastnictvi_kocka FOREIGN KEY (kocka) REFERENCES kocka ON DELETE CASCADE;
-ALTER TABLE vlastnictvi ADD CONSTRAINT  FK_vlastnictvi_propujcka FOREIGN KEY (propujcka) REFERENCES propujcka ON DELETE CASCADE;
 ALTER TABLE propujcka ADD CONSTRAINT FK_propujcka_vlastnictvi FOREIGN KEY (vlastnictvi) REFERENCES vlastnictvi ON DELETE CASCADE;
 ALTER TABLE propujcka ADD CONSTRAINT FK_propujcka_hostitel FOREIGN KEY (hostitel) REFERENCES hostitel ON DELETE CASCADE;
 
@@ -218,38 +208,90 @@ VALUES ('Adéla', 28, 'Žena', 'Whiskey', 'Dlouhá', 1 , 'Praha', 00001, 1, 'Rag
 INSERT INTO hostitel (jmeno, vek, pohlavi, jmeno_pro_kocku, ulice, cislo_popisne, mesto, psc, kocka, preferovana_rasa)
 VALUES ('Jakub', 60, 'Muž', 'Charlota', 'Široká', 2, 'Praha', 00001, 5, 'Sibiřská kočka');
 
+INSERT INTO teritorium(druh, kapacita_kocek, velikost)
+VALUES ('Hnízdní',5,1000);
+INSERT INTO teritorium(druh, kapacita_kocek, velikost)
+VALUES ('Rodinná',4,100);
+INSERT INTO teritorium(druh, kapacita_kocek, velikost)
+VALUES ('Skupinová',7,1300);
+INSERT INTO teritorium(druh, kapacita_kocek, velikost)
+VALUES ('Inviduální',1,10);
+INSERT INTO teritorium(druh, kapacita_kocek, velikost)
+VALUES ('Komunistická',1948,6666);
+
 -- !!! MUSI SE PRIDAT AZ PO TERITORIU
 
--- INSERT INTO zivot (stav, delka, zacatek, zpusob_smrti, kocka, teritorium)
--- VALUES ('Žije', NULL, TO_TIMESTAMP('12.12.2020 08:13:33', 'dd.mm.yyyy HH24:MI:SS'), NULL, 1, NULL);
--- INSERT INTO zivot (stav, delka, zacatek, zpusob_smrti, kocka, teritorium)
--- VALUES ('Nežije', TO_TIMESTAMP('12.1.1900 16:00:55', 'dd.mm.yyyy HH24:MI:SS'),
---     TO_TIMESTAMP('30.11.2020 12:22:22', 'dd.mm.yyyy HH24:MI:SS'), 'Utopeni', 1, 4);
--- INSERT INTO zivot (stav, delka, zacatek, zpusob_smrti, kocka, teritorium)
--- VALUES ('Žije', NULL, TO_TIMESTAMP('13.10.2019 15:54:59', 'dd.mm.yyyy HH24:MI:SS'), NULL, 4, NULL);
--- INSERT INTO zivot (stav, delka, zacatek, zpusob_smrti, kocka, teritorium)
--- VALUES ('Žije', NULL, TO_TIMESTAMP('20.11.2016 12:12:12', 'dd mm.yyyy HH24:MI:SS'), NULL, 3, NULL);
--- INSERT INTO zivot (stav, delka, zacatek, zpusob_smrti, kocka, teritorium)
--- VALUES ('Žije', NULL, TO_TIMESTAMP('3.8.2015 15:12:13', 'dd.mm.yyyy HH24:MI:SS'), NULL, 2, NULL);
--- INSERT INTO zivot (stav, delka, zacatek, zpusob_smrti, kocka, teritorium)
--- VALUES ('Žije', NULL, TO_TIMESTAMP('3.8.2015 15:12:13', 'dd.mm.yyyy HH24:MI:SS'), NULL, 5, NULL);
+INSERT INTO zivot (stav, delka, zacatek, zpusob_smrti, kocka, teritorium)
+VALUES ('Žije', NULL, TO_TIMESTAMP('12.12.2020 08:13:33', 'dd.mm.yyyy HH24:MI:SS'), NULL, 1, NULL);
+INSERT INTO zivot (stav, delka, zacatek, zpusob_smrti, kocka, teritorium)
+VALUES ('Nežije', TO_TIMESTAMP('12.1.1900 16:00:55', 'dd.mm.yyyy HH24:MI:SS'),
+    TO_TIMESTAMP('30.11.2020 12:22:22', 'dd.mm.yyyy HH24:MI:SS'), 'Utopeni', 1, 4);
+INSERT INTO zivot (stav, delka, zacatek, zpusob_smrti, kocka, teritorium)
+VALUES ('Žije', NULL, TO_TIMESTAMP('13.10.2019 15:54:59', 'dd.mm.yyyy HH24:MI:SS'), NULL, 4, NULL);
+INSERT INTO zivot (stav, delka, zacatek, zpusob_smrti, kocka, teritorium)
+VALUES ('Žije', NULL, TO_TIMESTAMP('20.11.2016 12:12:12', 'dd mm.yyyy HH24:MI:SS'), NULL, 3, NULL);
+INSERT INTO zivot (stav, delka, zacatek, zpusob_smrti, kocka, teritorium)
+VALUES ('Žije', NULL, TO_TIMESTAMP('3.8.2015 15:12:13', 'dd.mm.yyyy HH24:MI:SS'), NULL, 2, NULL);
+INSERT INTO zivot (stav, delka, zacatek, zpusob_smrti, kocka, teritorium)
+VALUES ('Žije', NULL, TO_TIMESTAMP('3.8.2015 15:12:13', 'dd.mm.yyyy HH24:MI:SS'), NULL, 5, NULL);
 
--- INSERT INTO vyskyt(od, do, kocka, teritorium)
--- VALUES (TO_TIMESTAMP('3.8.2015 15:12:13', 'dd.mm.yyyy HH24:MI:SS'),
---     NULL, 5, 4);
--- INSERT INTO vyskyt(od, do, kocka, teritorium)
--- VALUES (TO_TIMESTAMP('12.12.2020 08:13:33', 'dd.mm.yyyy HH24:MI:SS'),
---     TO_TIMESTAMP('18.12.2020 09:13:33', 'dd.mm.yyyy HH24:MI:SS'), 1, 4);
--- INSERT INTO vyskyt(od, do, kocka, teritorium)
--- VALUES (TO_TIMESTAMP('20.11.2016 12:12:12', 'dd.mm.yyyy HH24:MI:SS'),
---     NULL, 3, 2);
--- INSERT INTO vyskyt(od, do, kocka, teritorium)
--- VALUES (TO_TIMESTAMP('3.8.2015 15:12:13', 'dd.mm.yyyy HH24:MI:SS'),
---     NULL, 2, 3);
--- INSERT INTO vyskyt(od, do, kocka, teritorium)
--- VALUES (TO_TIMESTAMP('18.12.2020 09:13:33', 'dd.mm.yyyy HH24:MI:SS'),
---     TO_TIMESTAMP('20.12.2020 02:53:12', 'dd.mm.yyyy HH24:MI:SS'), 1, 1);
+INSERT INTO vyskyt(od, do, kocka, teritorium)
+VALUES (TO_TIMESTAMP('3.8.2015 15:12:13', 'dd.mm.yyyy HH24:MI:SS'),NULL, 5, 4);
+INSERT INTO vyskyt(od, do, kocka, teritorium)
+VALUES (TO_TIMESTAMP('12.12.2020 08:13:33', 'dd.mm.yyyy HH24:MI:SS'),
+    TO_TIMESTAMP('18.12.2020 09:13:33', 'dd.mm.yyyy HH24:MI:SS'), 1, 4);
+INSERT INTO vyskyt(od, do, kocka, teritorium)
+VALUES (TO_TIMESTAMP('20.11.2016 12:12:12', 'dd.mm.yyyy HH24:MI:SS'),NULL, 3, 2);
+INSERT INTO vyskyt(od, do, kocka, teritorium)
+VALUES (TO_TIMESTAMP('3.8.2015 15:12:13', 'dd.mm.yyyy HH24:MI:SS'), NULL, 2, 3);
+INSERT INTO vyskyt(od, do, kocka, teritorium)
+VALUES (TO_TIMESTAMP('18.12.2020 09:13:33', 'dd.mm.yyyy HH24:MI:SS'),
+    TO_TIMESTAMP('20.12.2020 02:53:12', 'dd.mm.yyyy HH24:MI:SS'), 1, 1);
 
+INSERT INTO vec(druh,pocet,teritorium)
+VALUES('Umělá myš',1,2);
+INSERT INTO vec(druh,pocet,teritorium)
+VALUES('Klubíčko',5,1);
+INSERT INTO vec(druh,pocet,teritorium)
+VALUES('Pilník',2,3);
+INSERT INTO vec(druh,pocet,teritorium)
+VALUES('Zrcadlo',42,4);
+INSERT INTO vec(druh,pocet,teritorium)
+VALUES('Srp',10,5);
+INSERT INTO vec(druh,pocet,teritorium)
+VALUES('Kladivo',10,5);
+
+INSERT INTO vlastnictvi(od,do,vec,kocka)
+VALUES(TO_TIMESTAMP('4.12.2020 23:59:59', 'dd.mm.yyyy HH24:MI:SS'),
+    TO_TIMESTAMP('8.8.2022 23:59:59', 'dd.mm.yyyy HH24:MI:SS'),1,1);
+INSERT INTO vlastnictvi(od,do,vec,kocka)
+VALUES(TO_TIMESTAMP('23.11.2018 01:01:33', 'dd.mm.yyyy HH24:MI:SS'),
+    TO_TIMESTAMP('6.6.2020 23:59:59', 'dd.mm.yyyy HH24:MI:SS'),2,2);
+INSERT INTO vlastnictvi(od,do,vec,kocka)
+VALUES(TO_TIMESTAMP('30.12.2020 23:59:59', 'dd.mm.yyyy HH24:MI:SS'),
+    TO_TIMESTAMP('30.12.2025 23:59:59', 'dd.mm.yyyy HH24:MI:SS'),1,3);
+INSERT INTO vlastnictvi(od,do,vec,kocka)
+VALUES(TO_TIMESTAMP('25.4.2018 16:00:53', 'dd.mm.yyyy HH24:MI:SS'),
+    TO_TIMESTAMP('11.11.2022 23:59:59', 'dd.mm.yyyy HH24:MI:SS'),5,4);
+INSERT INTO vlastnictvi(od,do,vec,kocka)
+VALUES(TO_TIMESTAMP('17.3.2011 00:00:00', 'dd.mm.yyyy HH24:MI:SS'),
+    TO_TIMESTAMP('18.3.2022 00:00:00', 'dd.mm.yyyy HH24:MI:SS'),5,5);
+
+INSERT INTO propujcka(od,do,vlastnictvi,hostitel)
+VALUES(TO_TIMESTAMP('17.3.2021 00:00:00', 'dd.mm.yyyy HH24:MI:SS'),
+    TO_TIMESTAMP('11.3.2022 00:00:00', 'dd.mm.yyyy HH24:MI:SS'),1,1);
+INSERT INTO propujcka(od,do,vlastnictvi,hostitel)
+VALUES(TO_TIMESTAMP('11.11.2020 11:23:00', 'dd.mm.yyyy HH24:MI:SS'),
+    TO_TIMESTAMP('11.11.2022 11:23:00', 'dd.mm.yyyy HH24:MI:SS'),1,1);
+INSERT INTO propujcka(od,do,vlastnictvi,hostitel)
+VALUES(TO_TIMESTAMP('18.3.2015 16:06:00', 'dd.mm.yyyy HH24:MI:SS'),
+    TO_TIMESTAMP('18.3.2022 16:06:00', 'dd.mm.yyyy HH24:MI:SS'),1,1);
+INSERT INTO propujcka(od,do,vlastnictvi,hostitel)
+VALUES(TO_TIMESTAMP('17.3.2011 00:00:00', 'dd.mm.yyyy HH24:MI:SS'),
+    TO_TIMESTAMP('6.6.2021 00:00:00', 'dd.mm.yyyy HH24:MI:SS'),1,1);
+INSERT INTO propujcka(od,do,vlastnictvi,hostitel)
+VALUES(TO_TIMESTAMP('24.10.2019 16:15:14', 'dd.mm.yyyy HH24:MI:SS'),
+    TO_TIMESTAMP('25.10.2019 16:15:14', 'dd.mm.yyyy HH24:MI:SS'),1,1);
 COMMIT;
 
 
