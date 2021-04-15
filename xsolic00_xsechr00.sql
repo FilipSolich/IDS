@@ -201,6 +201,8 @@ INSERT INTO hostitel (jmeno, vek, pohlavi, jmeno_pro_kocku, ulice, cislo_popisne
 VALUES ('Adéla', 28, 'Žena', 'Whiskey', 'Dlouhá', 1 , 'Praha', 00001, 1, 'Ragdoll');
 INSERT INTO hostitel (jmeno, vek, pohlavi, jmeno_pro_kocku, ulice, cislo_popisne, mesto, psc, kocka, preferovana_rasa)
 VALUES ('Jakub', 60, 'Muž', 'Charlota', 'Široká', 2, 'Praha', 00001, 5, 'Sibiřská kočka');
+INSERT INTO hostitel (jmeno, vek, pohlavi, jmeno_pro_kocku, ulice, cislo_popisne, mesto, psc, kocka, preferovana_rasa)
+VALUES ('Milan', 60, 'Muž', 'Mňauko', 'Božetěchova', 23, 'Olomouc', 00001, 5, 'Birma');
 
 INSERT INTO teritorium(druh, kapacita_kocek, velikost)
 VALUES ('Hnízdní',5,1000);
@@ -306,14 +308,23 @@ COMMIT;
 /*
 select count(HLAVNI_JMENO) as Počet_koček
 from KOCKA inner join VYSKYT using(id)
-where teritorium = (select id
+where teritorium in (select id
        from TERITORIUM
        where druh = 'Komunistická'
     ) ;
- */
+*/
+/*
+   #todo
+*/
 
 /*
-    - V klauzuli where se provádí vnořený select, který v tabulce "Teritorium" najde druh s názvem Komunistická vrátí jeho id.
-    - Potřebujeme spojit tabulku KOCKA s tabulkou VYSKYT, abychom získali kočky, které mají nějaký výskyt.
-    - Pokud se v záznamu rovná id_teritorium v tabulce VYSKYT a hodnota id TERITORIA, spočítáme počet koček pomocí agregační funkce count(), kde se počítá počet jmen koček.
+Seraď rasy koček podle oblibeností hostitelů a vypište země původu a body jejich oblíbenosti
+*/
+/*
+select MAX(H.preferovana_rasa) as Název_rasy,R.puvod as Země_půvou,COUNT(preferovana_rasa) AS body_oblíbenosti
+from RASA R left join HOSTITEL H on R.nazev = H.PREFEROVANA_RASA
+GROUP BY H.PREFEROVANA_RASA,R.puvod;
+ */
+/*
+    #todo
 */
