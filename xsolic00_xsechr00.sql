@@ -228,14 +228,14 @@ INSERT INTO zivot (stav, zacatek, konec, zpusob_smrti, kocka, teritorium)
 VALUES ('Žije', TO_TIMESTAMP('3.8.2015 15:12:13', 'dd.mm.yyyy HH24:MI:SS'), NULL, NULL, 5, NULL);
 
 INSERT INTO vyskyt(od, do, kocka, teritorium)
-VALUES (TO_TIMESTAMP('3.8.2015 15:12:13', 'dd.mm.yyyy HH24:MI:SS'),NULL, 5, 4);
+VALUES (TO_TIMESTAMP('3.8.2015 15:12:13', 'dd.mm.yyyy HH24:MI:SS'),NULL, 4, 5);
 INSERT INTO vyskyt(od, do, kocka, teritorium)
 VALUES (TO_TIMESTAMP('12.12.2020 08:13:33', 'dd.mm.yyyy HH24:MI:SS'),
-    TO_TIMESTAMP('18.12.2020 09:13:33', 'dd.mm.yyyy HH24:MI:SS'), 1, 4);
+    TO_TIMESTAMP('18.12.2020 09:13:33', 'dd.mm.yyyy HH24:MI:SS'), 5, 5);
 INSERT INTO vyskyt(od, do, kocka, teritorium)
-VALUES (TO_TIMESTAMP('20.11.2016 12:12:12', 'dd.mm.yyyy HH24:MI:SS'),NULL, 3, 2);
+VALUES (TO_TIMESTAMP('20.11.2016 12:12:12', 'dd.mm.yyyy HH24:MI:SS'),NULL, 3, 4);
 INSERT INTO vyskyt(od, do, kocka, teritorium)
-VALUES (TO_TIMESTAMP('3.8.2015 15:12:13', 'dd.mm.yyyy HH24:MI:SS'), NULL, 2, 3);
+VALUES (TO_TIMESTAMP('3.8.2015 15:12:13', 'dd.mm.yyyy HH24:MI:SS'), NULL, 2, 1);
 INSERT INTO vyskyt(od, do, kocka, teritorium)
 VALUES (TO_TIMESTAMP('18.12.2020 09:13:33', 'dd.mm.yyyy HH24:MI:SS'),
     TO_TIMESTAMP('20.12.2020 02:53:12', 'dd.mm.yyyy HH24:MI:SS'), 1, 1);
@@ -299,3 +299,21 @@ COMMIT;
 -- SELECT * FROM vec;
 -- SELECT * FROM propujcka;
 -- SELECT * FROM vlastnictvi;
+
+
+/*Sečtěte počet koček, které se vyskytují nebo vyskytovali v teritoriu s názvem "Komunistická"*/
+
+/*
+select count(HLAVNI_JMENO) as Počet_koček
+from KOCKA inner join VYSKYT using(id)
+where teritorium = (select id
+       from TERITORIUM
+       where druh = 'Komunistická'
+    ) ;
+ */
+
+/*
+    - V klauzuli where se provádí vnořený select, který v tabulce "Teritorium" najde druh s názvem Komunistická vrátí jeho id.
+    - Potřebujeme spojit tabulku KOCKA s tabulkou VYSKYT, abychom získali kočky, které mají nějaký výskyt.
+    - Pokud se v záznamu rovná id_teritorium v tabulce VYSKYT a hodnota id TERITORIA, spočítáme počet koček pomocí agregační funkce count(), kde se počítá počet jmen koček.
+*/
