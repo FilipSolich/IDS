@@ -1,13 +1,15 @@
 --
 -- xsolic00-xsechr00.sql
 --
--- Date:    3. 4. 2021
+-- Date:    17. 4. 2021
 -- Authors: Filip Solich <xsolic00@stud.fit.vutbr.cz>
 --          Marek Sechra <xsechr00@stud.fit.vutbr.cz>
 --
 
 
+--
 -- Drop everything
+--
 DROP SEQUENCE kocka_id_seq;
 DROP SEQUENCE hostitel_id_seq;
 DROP SEQUENCE zivot_id_seq;
@@ -28,7 +30,9 @@ DROP TABLE vlastnictvi CASCADE CONSTRAINTS;
 DROP TABLE propujcka CASCADE CONSTRAINTS;
 
 
+--
 -- Sequences for primary keys
+--
 CREATE SEQUENCE kocka_id_seq
 START WITH 1
 INCREMENT BY 1;
@@ -62,7 +66,9 @@ START WITH 1
 INCREMENT BY 1;
 
 
+--
 -- Create tables
+--
 CREATE TABLE kocka (
     id INT DEFAULT kocka_id_seq.NEXTVAL,
     hlavni_jmeno VARCHAR(30),
@@ -141,7 +147,9 @@ CREATE TABLE propujcka (
 );
 
 
+--
 -- Add PRIMARY KEY
+--
 ALTER TABLE kocka ADD CONSTRAINT PK_kocka PRIMARY KEY (id);
 ALTER TABLE hostitel ADD CONSTRAINT PK_hostitel PRIMARY KEY (id);
 ALTER TABLE rasa ADD CONSTRAINT PK_rasa PRIMARY KEY (nazev);
@@ -153,7 +161,9 @@ ALTER TABLE vlastnictvi ADD  CONSTRAINT PK_vlastnictvi PRIMARY KEY(id);
 ALTER TABLE propujcka ADD CONSTRAINT PK_propujcka PRIMARY KEY(id);
 
 
+--
 -- Add FOREIGN KEY
+--
 ALTER TABLE kocka ADD CONSTRAINT FK_kocka_rasa FOREIGN KEY (rasa) REFERENCES rasa;
 ALTER TABLE hostitel ADD CONSTRAINT FK_hostitel_kocka FOREIGN KEY (kocka) REFERENCES kocka;
 ALTER TABLE hostitel ADD CONSTRAINT FK_hostitel_preferovana_rasa FOREIGN KEY (preferovana_rasa) REFERENCES rasa;
@@ -168,7 +178,9 @@ ALTER TABLE propujcka ADD CONSTRAINT FK_propujcka_vlastnictvi FOREIGN KEY (vlast
 ALTER TABLE propujcka ADD CONSTRAINT FK_propujcka_hostitel FOREIGN KEY (hostitel) REFERENCES hostitel ON DELETE CASCADE;
 
 
+--
 -- INSERT data
+--
 INSERT INTO rasa (nazev, barva_oci, puvod, max_delka_tesaku)
 VALUES ('Turecká angora', 'ČERNÁ', 'Turecko', 20);
 INSERT INTO rasa (nazev, barva_oci, puvod, max_delka_tesaku)
@@ -202,7 +214,7 @@ VALUES ('Adéla', 28, 'Žena', 'Whiskey', 'Dlouhá', 1 , 'Praha', 00001, 1, 'Rag
 INSERT INTO hostitel (jmeno, vek, pohlavi, jmeno_pro_kocku, ulice, cislo_popisne, mesto, psc, kocka, preferovana_rasa)
 VALUES ('Jakub', 60, 'Muž', 'Charlota', 'Široká', 2, 'Praha', 00001, 5, 'Sibiřská kočka');
 INSERT INTO hostitel (jmeno, vek, pohlavi, jmeno_pro_kocku, ulice, cislo_popisne, mesto, psc, kocka, preferovana_rasa)
-VALUES ('Milan', 60, 'Muž', 'Mňauko', 'Božetěchova', 23, 'Olomouc', 00001, 5, 'Birma');
+VALUES ('Milan', 60, 'Muž', 'Mňauko', 'Božetěchova', 23, 'Olomouc', 00001, 4, 'Birma');
 
 INSERT INTO teritorium(druh, kapacita_kocek, velikost)
 VALUES ('Hnízdní',5,1000);
@@ -291,7 +303,9 @@ VALUES(TO_TIMESTAMP('24.10.2019 16:15:14', 'dd.mm.yyyy HH24:MI:SS'),
 COMMIT;
 
 
+--
 -- SELECT
+--
 -- SELECT * FROM kocka;
 -- SELECT * FROM rasa;
 -- SELECT * FROM hostitel;
@@ -302,6 +316,15 @@ COMMIT;
 -- SELECT * FROM propujcka;
 -- SELECT * FROM vlastnictvi;
 
+-- Vyhledá kočky a kolik mají služebnictva.
+SELECT k.hlavni_jmeno as "Kočka", COUNT(h.jmeno) as "Počet služebnictva"
+FROM kocka k LEFT JOIN hostitel h ON k.id = h.kocka
+GROUP BY k.hlavni_jmeno;
+
+-- Vyhledá ID a druh teritorií, ve kterých je alespoň jedna věc minimálně 5 krát.
+SELECT t.id as "ID teritoria", t.druh as "Druh teritoria"
+FROM teritorium t
+WHERE EXISTS (SELECT id FROM vec v WHERE v.teritorium = t.id AND v.pocet >= 5);
 
 /*Sečtěte počet koček, které se vyskytují nebo vyskytovali v teritoriu s názvem "Komunistická"*/
 
