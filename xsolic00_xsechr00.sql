@@ -326,28 +326,21 @@ SELECT t.id as "ID teritoria", t.druh as "Druh teritoria"
 FROM teritorium t
 WHERE EXISTS (SELECT id FROM vec v WHERE v.teritorium = t.id AND v.pocet >= 5);
 
-/*Sečtěte počet koček, které se vyskytují nebo vyskytovali v teritoriu s názvem "Komunistická"*/
-
-/*
-select count(HLAVNI_JMENO) as Počet_koček
-from KOCKA inner join VYSKYT using(id)
-where teritorium in (select id
-       from TERITORIUM
-       where druh = 'Komunistická'
+-- Sečtěte počet koček, které se vyskytují nebo vyskytovali v teritoriu s názvem "Komunistická"
+SELECT count(hlavni_jmeno) AS Počet_koček
+FROM KOCKA INNER JOIN VYSKYT USING(id)
+WHERE teritorium IN (SELECT id
+       FROM TERITORIUM
+       WHERE druh = 'Komunistická'
     ) ;
-*/
-/*
-   #todo
-*/
+-- Seraď rasy koček podle oblibeností hostitelů a vypište země původu a body jejich oblíbenosti
 
-/*
-Seraď rasy koček podle oblibeností hostitelů a vypište země původu a body jejich oblíbenosti
-*/
-/*
-select MAX(H.preferovana_rasa) as Název_rasy,R.puvod as Země_půvou,COUNT(preferovana_rasa) AS body_oblíbenosti
-from RASA R left join HOSTITEL H on R.nazev = H.PREFEROVANA_RASA
-GROUP BY H.PREFEROVANA_RASA,R.puvod;
- */
-/*
-    #todo
-*/
+SELECT MAX(H.preferovana_rasa) AS Název_rasy,R.puvod AS Země_půvou,COUNT(preferovana_rasa) AS body_oblíbenosti
+FROM RASA R LEFT JOIN HOSTITEL H ON R.nazev = H.preferovana_rasa
+GROUP BY H.preferovana_rasa,R.puvod;
+
+-- Vyberte kočky, které žijí v teritoriu od roku 2020 a vypište druh teritoria, ve kterém je kočka a datum jejich nastěhování
+
+SELECT k.hlavni_jmeno AS Jméno_kočky,t.druh AS Druh_teritoria,v.od AS Datum_přistěhování
+FROM kocka k INNER JOIN vyskyt v  ON k.id = v.id INNER JOIN teritorium t ON v.id = t.id
+WHERE v.od >= DATE '2020-01-01'
