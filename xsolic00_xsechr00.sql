@@ -53,10 +53,6 @@ CREATE SEQUENCE teritorium_id_seq
 START WITH 1
 INCREMENT BY 1;
 
-CREATE SEQUENCE vec_id_seq
-START WITH  1
-INCREMENT BY 1;
-
 CREATE SEQUENCE vlastnictvi_id_seq
 START WITH 1
 INCREMENT BY 1;
@@ -64,6 +60,11 @@ INCREMENT BY 1;
 CREATE SEQUENCE propujcka_id_seq
 START WITH 1
 INCREMENT BY 1;
+
+CREATE SEQUENCE  vec_id_seq
+START WITH 1
+INCREMENT BY 1;
+
 
 
 --
@@ -124,7 +125,7 @@ CREATE TABLE teritorium (
 );
 
 CREATE TABLE vec (
-    id INT DEFAULT vec_id_seq.NEXTVAL,
+    id INT,-- DEFAULT vec_id_seq.NEXTVAL,
     druh VARCHAR(30) NOT NULL,
     pocet INT,
     teritorium INT NOT NULL
@@ -145,6 +146,49 @@ CREATE TABLE propujcka (
     vlastnictvi INT NOT NULL,
     hostitel INT NOT NULL
 );
+
+--
+-- TRIGERS
+--
+-- trigger pro automatické generování hotnot primárního klíče
+-- Tabulka: vec
+-- ID: id
+CREATE OR REPLACE TRIGGER id_vec_trigger
+    BEFORE INSERT ON vec
+    FOR EACH ROW
+BEGIN
+        :NEW.id := vec_id_seq.NEXTVAL;
+    END;
+
+-- Trigger pro kontrolu tabulky života jestli nebyl začátek a konec zapsán jako budoucí datum a jestli je začátek < konec (pokud není null)
+-- tabulka: zivot
+-- atribut: zacatek,konec
+
+
+CREATE OR REPLACE TRIGGER check_zivot_start
+    BEFORE INSERT OR UPDATE ON zivot
+    FOR EACH ROW
+    BEGIN
+    IF :NEW.zacatek > CURRENT_DATE
+    THEN
+        :NEW.zacatek = CURRENT_DATE;
+    END IF;
+    IF  :NEW.konec is not null
+        THEN
+        IF (:NEW.konec) > (CURRENT_DATE)
+        THEN
+            :NEW.konec = CURRENT_DATE;
+        END IF;
+    END IF;
+    IF :NEW.konec is not null
+    THEN
+        IF :NEW.konec > :NEW.zacatek
+        THEN
+            RAISE_APPLICATION_ERROR(-20001, 'Nespravná hodnota v tabulce zivot, život nemůže začít později než když skončí');
+        END IF;
+    END IF;
+    END;
+
 
 
 --
@@ -315,7 +359,7 @@ COMMIT;
 -- SELECT * FROM vec;
 -- SELECT * FROM propujcka;
 -- SELECT * FROM vlastnictvi;
-
+/*
 -- Vyhledá kočky a kolik mají služebnictva.
 SELECT k.hlavni_jmeno as "Kočka", COUNT(h.jmeno) as "Počet služebnictva"
 FROM kocka k LEFT JOIN hostitel h ON k.id = h.kocka
@@ -344,3 +388,9 @@ GROUP BY H.preferovana_rasa,R.puvod;
 SELECT k.hlavni_jmeno AS Jméno_kočky,t.druh AS Druh_teritoria,v.od AS Datum_přistěhování
 FROM kocka k INNER JOIN vyskyt v  ON k.id = v.id INNER JOIN teritorium t ON v.id = t.id
 WHERE v.od >= DATE '2020-01-01'
+
+ */
+
+
+
+
