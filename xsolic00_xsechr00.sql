@@ -442,8 +442,29 @@ SELECT plan_table_output FROM table (dbms_xplan.display());
 
 CREATE INDEX index_pocet_mrtvych_kocek ON zivot(konec);
 
+
+
+
+
 -- Volani procedury:
 BEGIN
   hostiele_spatne_psc();
 END;
 
+--definici přístupových práv k databázovým objektům pro druhého člena týmu,
+-- TABLES:
+/*
+GRANT INSERT, UPDATE, SELECT ON kocka TO xsechr00;
+GRANT INSERT, UPDATE, SELECT ON rasa TO xsechr00;
+GRANT INSERT, UPDATE, SELECT ON hostitel TO xsechr00;
+GRANT INSERT, UPDATE, SELECT ON zivot TO xsechr00;
+GRANT INSERT, UPDATE, SELECT ON vyskyt TO xsechr00;
+GRANT INSERT, UPDATE, SELECT ON teritorium TO xsechr00;
+GRANT INSERT, UPDATE, SELECT ON propujcka TO xsechr00;
+GRANT INSERT, UPDATE, SELECT ON vlastnictvi TO xsechr00;
+
+-- Procedurs:
+GRANT EXECUTE ON hostiele_spatne_psc TO xsechr00;
+-- TODO secondd procedure
+
+ */
