@@ -217,39 +217,7 @@ end;
 
 -- ToDo procedura 2 -----------------------------------------------------------------
 
--- Vytvoření explicit "index"
--- + dotaz SQL
---  lze kombinovat s "explain plan"
---   spojení 2 tabulek, agregační funkce, group by
-
--- dotaz: počet koček, které umřeli
--- tabulka: kočka, život
-
-/*
-SELECT count(*)
-FROM kocka k LEFT JOIN zivot z ON k.id = z.id
-WHERE z.konec is not null
-GROUP BY z.konec;
-*/
-
-DROP INDEX index_pocet_mrtvych_kocek
-
-EXPLAIN PLAN FOR
-    SELECT count(*) as pocet_mrtvych_kocek
-    FROM kocka k left join zivot z on k.id = z.id
-    WHERE z.konec is not null
-    GROUP BY z.konec
-SELECT plan_table_output FROM table (dbms_xplan.display());
-
-CREATE INDEX   index_pocet_mrtvych_kocek
-
-
-
-
-
-
-
-
+-- INDEX is last
 
 
 
@@ -454,9 +422,27 @@ WHERE v.od >= DATE '2020-01-01'
 
  */
 
+-- Vytvoření explicit "index"
+-- + dotaz SQL
+--  lze kombinovat s "explain plan"
+--   spojení 2 tabulek, agregační funkce, group by
+
+-- dotaz: počet koček, které umřeli
+-- tabulka: kočka, život
+
+
+--DROP INDEX index_pocet_mrtvych_kocek;
+
+EXPLAIN PLAN FOR
+    SELECT count(*) as pocet_mrtvych_kocek
+    FROM kocka k left join zivot z on k.id = z.id
+    WHERE z.konec is not null
+    GROUP BY z.konec;
+SELECT plan_table_output FROM table (dbms_xplan.display());
+
+CREATE INDEX index_pocet_mrtvych_kocek ON zivot(konec);
 
 -- Volani procedury:
-
 BEGIN
   hostiele_spatne_psc();
 END;
