@@ -168,8 +168,6 @@ BEGIN
 CREATE OR REPLACE TRIGGER check_zivot_start
     BEFORE INSERT OR UPDATE ON zivot
     FOR EACH ROW
-    DECLARE
-        zacatek int ;
     BEGIN
     IF :NEW.zacatek > CURRENT_DATE
     THEN
@@ -190,6 +188,36 @@ CREATE OR REPLACE TRIGGER check_zivot_start
         END IF;
     END IF;
     END;
+
+--
+-- PROCEDURS
+--
+-- Procedura, která vypíše hostitele, které mají špatně zadané PSČ
+-- tabulka: hostitel:
+-- atribut: psc(int)
+
+CREATE OR REPLACE PROCEDURE hostiele_spatne_psc as
+CURSOR hostitele is select * from hostitel;
+
+h hostitele%ROWTYPE;
+BEGIN
+    dbms_output.put_line('Hostitele se spatnym PSC : ');
+    open hostitele;
+    loop
+       fetch hostitele  into h; --nacteni prvniho radku
+       exit when hostitele%NOTFOUND;
+       if not REGEXP_LIKE (h.psc,'^[0-9][0-9][0-9][0-9][0-9]$')
+           then
+           dbms_output.put_line('Hostitel: ' || h.jmeno || ' Vek: ' ||  h.vek || ' Pohlavi: ' || h.pohlavi || ' Jmeno pro kocku:' || h.jmeno_pro_kocku|| ' Adresa: ' || h.ulice || ' ' || h.cislo_popisne );
+           dbms_output.put_line(' SPATNE PSC: '|| h.psc );
+        end if;
+end loop;
+    CLOSE hostitele;
+end;
+
+
+
+
 
 
 
@@ -250,17 +278,17 @@ INSERT INTO kocka (hlavni_jmeno, vzorek_kuze, barva_srsti, rasa)
 VALUES ('Gordon', 'VZOREK5', 'ČERNÁ', 'Sibiřská kočka');
 
 INSERT INTO hostitel (jmeno, vek, pohlavi, jmeno_pro_kocku, ulice, cislo_popisne, mesto, psc, kocka, preferovana_rasa)
-VALUES ('Petr', 30, 'Muž', 'Fous', 'Modrá', 8, 'Brno', 12345, 1, 'Turecká angora');
+VALUES ('Petr', 30, 'Muž', 'Fous', 'Modrá', 8, 'Brno', 123456, 1, 'Turecká angora');
 INSERT INTO hostitel (jmeno, vek, pohlavi, jmeno_pro_kocku, ulice, cislo_popisne, mesto, psc, kocka,  preferovana_rasa)
 VALUES ('Vašek', 25, 'Muž', 'Tlapka', 'Vratimovká', 15, 'Ostrava', 45612, 2, 'Birma');
 INSERT INTO hostitel (jmeno, vek, pohlavi, jmeno_pro_kocku, ulice, cislo_popisne, mesto, psc, kocka, preferovana_rasa)
 VALUES ('Aneta', 33, 'Žena', 'Morris', 'Cholevova', 12, 'Ostrava', 54612, 3, 'Perská kočka');
 INSERT INTO hostitel (jmeno, vek, pohlavi, jmeno_pro_kocku, ulice, cislo_popisne, mesto, psc, kocka, preferovana_rasa)
-VALUES ('Adéla', 28, 'Žena', 'Whiskey', 'Dlouhá', 1 , 'Praha', 00001, 1, 'Ragdoll');
+VALUES ('Adéla', 28, 'Žena', 'Whiskey', 'Dlouhá', 1 , 'Praha', 10001, 1, 'Ragdoll');
 INSERT INTO hostitel (jmeno, vek, pohlavi, jmeno_pro_kocku, ulice, cislo_popisne, mesto, psc, kocka, preferovana_rasa)
-VALUES ('Jakub', 60, 'Muž', 'Charlota', 'Široká', 2, 'Praha', 00001, 5, 'Sibiřská kočka');
+VALUES ('Jakub', 60, 'Muž', 'Charlota', 'Široká', 2, 'Praha', 10001, 5, 'Sibiřská kočka');
 INSERT INTO hostitel (jmeno, vek, pohlavi, jmeno_pro_kocku, ulice, cislo_popisne, mesto, psc, kocka, preferovana_rasa)
-VALUES ('Milan', 60, 'Muž', 'Mňauko', 'Božetěchova', 23, 'Olomouc', 00001, 4, 'Birma');
+VALUES ('Milan', 60, 'Muž', 'Mňauko', 'Božetěchova', 23, 'Olomouc', 10001, 4, 'Birma');
 
 INSERT INTO teritorium(druh, kapacita_kocek, velikost)
 VALUES ('Hnízdní',5,1000);
@@ -277,7 +305,7 @@ VALUES ('Komunistická',1948,6666);
 INSERT INTO zivot (stav, zacatek, konec, zpusob_smrti, kocka, teritorium)
 VALUES ('Žije', TO_TIMESTAMP('12.12.2020 08:13:33', 'dd.mm.yyyy HH24:MI:SS'), NULL, NULL, 1, NULL);
 INSERT INTO zivot (stav, zacatek, konec, zpusob_smrti, kocka, teritorium)
-VALUES ('Nežije', TO_TIMESTAMP('30.11.2021 12:22:22', 'dd.mm.yyyy HH24:MI:SS'),
+VALUES ('Nežije', TO_TIMESTAMP('30.11.2020 12:22:22', 'dd.mm.yyyy HH24:MI:SS'),
     TO_TIMESTAMP('12.12.2020 08:13:32', 'dd.mm.yyyy HH24:MI:SS'), 'Utopeni', 1, 4);
 INSERT INTO zivot (stav, zacatek, konec, zpusob_smrti, kocka, teritorium)
 VALUES ('Žije', TO_TIMESTAMP('13.10.2019 15:54:59', 'dd.mm.yyyy HH24:MI:SS'), NULL, NULL, 4, NULL);
@@ -395,5 +423,9 @@ WHERE v.od >= DATE '2020-01-01'
  */
 
 
+-- Volani procedury:
 
+BEGIN
+  hostiele_spatne_psc();
+END;
 
