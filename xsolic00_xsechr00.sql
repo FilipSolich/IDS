@@ -168,21 +168,23 @@ BEGIN
 CREATE OR REPLACE TRIGGER check_zivot_start
     BEFORE INSERT OR UPDATE ON zivot
     FOR EACH ROW
+    DECLARE
+        zacatek int ;
     BEGIN
     IF :NEW.zacatek > CURRENT_DATE
     THEN
-        :NEW.zacatek = CURRENT_DATE;
+        :NEW.zacatek := CURRENT_DATE;
     END IF;
     IF  :NEW.konec is not null
         THEN
-        IF (:NEW.konec) > (CURRENT_DATE)
+        IF :NEW.konec > CURRENT_DATE
         THEN
-            :NEW.konec = CURRENT_DATE;
+            :NEW.konec := CURRENT_DATE;
         END IF;
     END IF;
     IF :NEW.konec is not null
     THEN
-        IF :NEW.konec > :NEW.zacatek
+        IF :NEW.zacatek > :NEW.konec
         THEN
             RAISE_APPLICATION_ERROR(-20001, 'Nespravná hodnota v tabulce zivot, život nemůže začít později než když skončí');
         END IF;
@@ -271,10 +273,11 @@ VALUES ('Inviduální',1,10);
 INSERT INTO teritorium(druh, kapacita_kocek, velikost)
 VALUES ('Komunistická',1948,6666);
 
+
 INSERT INTO zivot (stav, zacatek, konec, zpusob_smrti, kocka, teritorium)
 VALUES ('Žije', TO_TIMESTAMP('12.12.2020 08:13:33', 'dd.mm.yyyy HH24:MI:SS'), NULL, NULL, 1, NULL);
 INSERT INTO zivot (stav, zacatek, konec, zpusob_smrti, kocka, teritorium)
-VALUES ('Nežije', TO_TIMESTAMP('30.11.2020 12:22:22', 'dd.mm.yyyy HH24:MI:SS'),
+VALUES ('Nežije', TO_TIMESTAMP('30.11.2021 12:22:22', 'dd.mm.yyyy HH24:MI:SS'),
     TO_TIMESTAMP('12.12.2020 08:13:32', 'dd.mm.yyyy HH24:MI:SS'), 'Utopeni', 1, 4);
 INSERT INTO zivot (stav, zacatek, konec, zpusob_smrti, kocka, teritorium)
 VALUES ('Žije', TO_TIMESTAMP('13.10.2019 15:54:59', 'dd.mm.yyyy HH24:MI:SS'), NULL, NULL, 4, NULL);
