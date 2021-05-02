@@ -33,6 +33,7 @@ DROP INDEX index_pocet_mrtvych_kocek;
 
 DROP MATERIALIZED VIEW pohled;
 
+
 --
 -- Sequences for primary keys
 --
@@ -67,7 +68,6 @@ INCREMENT BY 1;
 CREATE SEQUENCE  vec_id_seq
 START WITH 1
 INCREMENT BY 1;
-
 
 
 --
@@ -233,11 +233,8 @@ BEGIN
     dbms_output.put_line('Rasa prvni kocky: ' || k_rasa);
 EXCEPTION
     WHEN no_data_found THEN
-        dbms_output.put_line('Prvni kocka neni v databazi');
+        dbms_output.put_line('Kocka s ID 1 neni v databazi');
 END;
-
-
--- INDEX is last
 
 
 --
