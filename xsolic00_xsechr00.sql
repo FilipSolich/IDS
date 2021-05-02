@@ -29,7 +29,7 @@ DROP TABLE vyskyt CASCADE CONSTRAINTS;
 DROP TABLE vlastnictvi CASCADE CONSTRAINTS;
 DROP TABLE propujcka CASCADE CONSTRAINTS;
 
-DROP MATERIALIZED VIEW pohled;
+--DROP MATERIALIZED VIEW pohled;
 
 --
 -- Sequences for primary keys
@@ -439,7 +439,7 @@ WHERE v.od >= DATE '2020-01-01'
 -- tabulka: kočka, život
 
 
---DROP INDEX index_pocet_mrtvych_kocek;
+DROP INDEX index_pocet_mrtvych_kocek;
 
 EXPLAIN PLAN FOR
     SELECT count(*) as pocet_mrtvych_kocek
