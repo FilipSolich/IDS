@@ -1,7 +1,7 @@
 --
 -- xsolic00-xsechr00.sql
 --
--- Date:    17. 4. 2021
+-- Date:    1. 5. 2021
 -- Authors: Filip Solich <xsolic00@stud.fit.vutbr.cz>
 --          Marek Sechra <xsechr00@stud.fit.vutbr.cz>
 --
@@ -147,78 +147,94 @@ CREATE TABLE propujcka (
     hostitel INT NOT NULL
 );
 
+
 --
--- TRIGERS
+-- TRIGGER
 --
+
 -- trigger pro automatické generování hotnot primárního klíče
 -- Tabulka: vec
 -- ID: id
 CREATE OR REPLACE TRIGGER id_vec_trigger
     BEFORE INSERT ON vec
     FOR EACH ROW
-BEGIN
+    BEGIN
         :NEW.id := vec_id_seq.NEXTVAL;
     END;
 
 -- Trigger pro kontrolu tabulky života jestli nebyl začátek a konec zapsán jako budoucí datum a jestli je začátek < konec (pokud není null)
 -- tabulka: zivot
 -- atribut: zacatek,konec
-
-
 CREATE OR REPLACE TRIGGER check_zivot_start
     BEFORE INSERT OR UPDATE ON zivot
     FOR EACH ROW
     BEGIN
-    IF :NEW.zacatek > CURRENT_DATE
-    THEN
-        :NEW.zacatek := CURRENT_DATE;
-    END IF;
-    IF  :NEW.konec is not null
+        IF :NEW.zacatek > CURRENT_DATE
         THEN
-        IF :NEW.konec > CURRENT_DATE
-        THEN
-            :NEW.konec := CURRENT_DATE;
+            :NEW.zacatek := CURRENT_DATE;
         END IF;
-    END IF;
-    IF :NEW.konec is not null
-    THEN
-        IF :NEW.zacatek > :NEW.konec
+        IF :NEW.konec is not null
         THEN
-            RAISE_APPLICATION_ERROR(-20001, 'Nespravná hodnota v tabulce zivot, život nemůže začít později než když skončí');
+            IF :NEW.konec > CURRENT_DATE
+            THEN
+                :NEW.konec := CURRENT_DATE;
+            END IF;
         END IF;
-    END IF;
+        IF :NEW.konec is not null
+        THEN
+            IF :NEW.zacatek > :NEW.konec
+            THEN
+                RAISE_APPLICATION_ERROR(-20001, 'Nespravná hodnota v tabulce zivot, život nemůže začít později než když skončí');
+            END IF;
+        END IF;
     END;
 
+
 --
--- PROCEDURS
+-- PROCEDURE
 --
+
 -- Procedura, která vypíše hostitele, které mají špatně zadané PSČ
 -- tabulka: hostitel:
 -- atribut: psc(int)
-
-CREATE OR REPLACE PROCEDURE hostiele_spatne_psc as
+CREATE OR REPLACE PROCEDURE hostitele_spatne_psc as
 CURSOR hostitele is select * from hostitel;
 
 h hostitele%ROWTYPE;
 BEGIN
     dbms_output.put_line('Hostitele se spatnym PSC : ');
     open hostitele;
-    loop
-       fetch hostitele  into h; --nacteni prvniho radku
-       exit when hostitele%NOTFOUND;
-       if not REGEXP_LIKE (h.psc,'^[0-9][0-9][0-9][0-9][0-9]$')
-           then
-           dbms_output.put_line('Hostitel: ' || h.jmeno || ' Vek: ' ||  h.vek || ' Pohlavi: ' || h.pohlavi || ' Jmeno pro kocku:' || h.jmeno_pro_kocku|| ' Adresa: ' || h.ulice || ' ' || h.cislo_popisne );
-           dbms_output.put_line(' SPATNE PSC: '|| h.psc );
-        end if;
-end loop;
+        loop
+           fetch hostitele  into h; --nacteni prvniho radku
+           exit when hostitele%NOTFOUND;
+           if not REGEXP_LIKE (h.psc,'^[0-9][0-9][0-9][0-9][0-9]$')
+               then
+               dbms_output.put_line('Hostitel: ' || h.jmeno || ' Vek: ' ||  h.vek || ' Pohlavi: ' || h.pohlavi || ' Jmeno pro kocku:' || h.jmeno_pro_kocku|| ' Adresa: ' || h.ulice || ' ' || h.cislo_popisne );
+               dbms_output.put_line(' SPATNE PSC: '|| h.psc );
+            end if;
+        end loop;
     CLOSE hostitele;
 end;
 
--- ToDo procedura 2 -----------------------------------------------------------------
+-- Procedura, která vypíše jméno a rasu první kočky
+-- tabulka: kocka, rasa
+CREATE OR REPLACE PROCEDURE prvni_kocka IS
+    prvni kocka.id%type := 1;
+    k_jmeno kocka.hlavni_jmeno%type;
+    k_rasa rasa.nazev%type;
+BEGIN
+    SELECT k.hlavni_jmeno, r.nazev INTO k_jmeno, k_rasa
+    FROM kocka k LEFT JOIN rasa r ON k.rasa = r.nazev
+    WHERE k.id = prvni;
+    dbms_output.put_line('Jmeno prvni kocky: ' || k_jmeno);
+    dbms_output.put_line('Rasa prvni kocky: ' || k_rasa);
+EXCEPTION
+    WHEN no_data_found THEN
+        dbms_output.put_line('Prvni kocka neni v databazi');
+END;
+
 
 -- INDEX is last
-
 
 
 --
@@ -390,6 +406,7 @@ COMMIT;
 -- SELECT * FROM vec;
 -- SELECT * FROM propujcka;
 -- SELECT * FROM vlastnictvi;
+
 /*
 -- Vyhledá kočky a kolik mají služebnictva.
 SELECT k.hlavni_jmeno as "Kočka", COUNT(h.jmeno) as "Počet služebnictva"
@@ -404,23 +421,22 @@ WHERE EXISTS (SELECT id FROM vec v WHERE v.teritorium = t.id AND v.pocet >= 5);
 -- Sečtěte počet koček, které se vyskytují nebo vyskytovali v teritoriu s názvem "Komunistická"
 SELECT count(hlavni_jmeno) AS Počet_koček
 FROM KOCKA INNER JOIN VYSKYT USING(id)
-WHERE teritorium IN (SELECT id
-       FROM TERITORIUM
-       WHERE druh = 'Komunistická'
-    ) ;
--- Seraď rasy koček podle oblibeností hostitelů a vypište země původu a body jejich oblíbenosti
+WHERE teritorium IN (
+    SELECT id
+    FROM TERITORIUM
+    WHERE druh = 'Komunistická'
+);
 
+-- Seraď rasy koček podle oblibeností hostitelů a vypište země původu a body jejich oblíbenosti
 SELECT MAX(H.preferovana_rasa) AS Název_rasy,R.puvod AS Země_půvou,COUNT(preferovana_rasa) AS body_oblíbenosti
 FROM RASA R LEFT JOIN HOSTITEL H ON R.nazev = H.preferovana_rasa
 GROUP BY H.preferovana_rasa,R.puvod;
 
 -- Vyberte kočky, které žijí v teritoriu od roku 2020 a vypište druh teritoria, ve kterém je kočka a datum jejich nastěhování
-
 SELECT k.hlavni_jmeno AS Jméno_kočky,t.druh AS Druh_teritoria,v.od AS Datum_přistěhování
 FROM kocka k INNER JOIN vyskyt v  ON k.id = v.id INNER JOIN teritorium t ON v.id = t.id
 WHERE v.od >= DATE '2020-01-01'
-
- */
+*/
 
 -- Vytvoření explicit "index"
 -- + dotaz SQL
@@ -442,18 +458,18 @@ SELECT plan_table_output FROM table (dbms_xplan.display());
 
 CREATE INDEX index_pocet_mrtvych_kocek ON zivot(konec);
 
-
-
-
-
--- Volani procedury:
+-- Volani procedur:
 BEGIN
-  hostiele_spatne_psc();
+  hostitele_spatne_psc();
 END;
 
---definici přístupových práv k databázovým objektům pro druhého člena týmu,
+BEGIN
+    prvni_kocka();
+END;
+
+
+-- definice přístupových práv k databázovým objektům pro druhého člena týmu
 -- TABLES:
-/*
 GRANT INSERT, UPDATE, SELECT ON kocka TO xsechr00;
 GRANT INSERT, UPDATE, SELECT ON rasa TO xsechr00;
 GRANT INSERT, UPDATE, SELECT ON hostitel TO xsechr00;
@@ -464,7 +480,5 @@ GRANT INSERT, UPDATE, SELECT ON propujcka TO xsechr00;
 GRANT INSERT, UPDATE, SELECT ON vlastnictvi TO xsechr00;
 
 -- Procedurs:
-GRANT EXECUTE ON hostiele_spatne_psc TO xsechr00;
--- TODO secondd procedure
-
- */
+GRANT EXECUTE ON hostitele_spatne_psc TO xsechr00;
+GRANT EXECUTE ON prvni_kocka TO xsechr00;
