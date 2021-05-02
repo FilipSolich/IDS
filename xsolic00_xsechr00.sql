@@ -1,7 +1,7 @@
 --
 -- xsolic00-xsechr00.sql
 --
--- Date:    1. 5. 2021
+-- Date:    2. 5. 2021
 -- Authors: Filip Solich <xsolic00@stud.fit.vutbr.cz>
 --          Marek Sechra <xsechr00@stud.fit.vutbr.cz>
 --
@@ -29,6 +29,7 @@ DROP TABLE vyskyt CASCADE CONSTRAINTS;
 DROP TABLE vlastnictvi CASCADE CONSTRAINTS;
 DROP TABLE propujcka CASCADE CONSTRAINTS;
 
+DROP MATERIALIZED VIEW pohled;
 
 --
 -- Sequences for primary keys
@@ -397,15 +398,6 @@ COMMIT;
 --
 -- SELECT
 --
--- SELECT * FROM kocka;
--- SELECT * FROM rasa;
--- SELECT * FROM hostitel;
--- SELECT * FROM zivot;
--- SELECT * FROM vyskyt;
--- SELECT * FROM teritorium;
--- SELECT * FROM vec;
--- SELECT * FROM propujcka;
--- SELECT * FROM vlastnictvi;
 
 /*
 -- Vyhledá kočky a kolik mají služebnictva.
@@ -458,17 +450,7 @@ SELECT plan_table_output FROM table (dbms_xplan.display());
 
 CREATE INDEX index_pocet_mrtvych_kocek ON zivot(konec);
 
--- Volani procedur:
-BEGIN
-  hostitele_spatne_psc();
-END;
-
-BEGIN
-    prvni_kocka();
-END;
-
-
--- definice přístupových práv k databázovým objektům pro druhého člena týmu
+-- Definice přístupových práv k databázovým objektům pro druhého člena týmu
 -- TABLES:
 GRANT INSERT, UPDATE, SELECT ON kocka TO xsechr00;
 GRANT INSERT, UPDATE, SELECT ON rasa TO xsechr00;
@@ -479,6 +461,22 @@ GRANT INSERT, UPDATE, SELECT ON teritorium TO xsechr00;
 GRANT INSERT, UPDATE, SELECT ON propujcka TO xsechr00;
 GRANT INSERT, UPDATE, SELECT ON vlastnictvi TO xsechr00;
 
--- Procedurs:
+-- PROCEDURES:
 GRANT EXECUTE ON hostitele_spatne_psc TO xsechr00;
 GRANT EXECUTE ON prvni_kocka TO xsechr00;
+
+-- Pohled pro druhého člena týmu
+CREATE MATERIALIZED VIEW pohled AS
+    SELECT k.hlavni_jmeno, h.jmeno
+    FROM kocka k LEFT JOIN hostitel h ON k.id = h.kocka
+    WHERE k.barva_srsti = 'ČERVENÁ';
+
+-- Volani procedur:
+BEGIN
+    hostitele_spatne_psc();
+    prvni_kocka();
+END;
+
+-- Pouzití pohledu
+SELECT *
+FROM pohled;
