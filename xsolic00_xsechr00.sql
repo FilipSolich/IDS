@@ -29,6 +29,8 @@ DROP TABLE vyskyt CASCADE CONSTRAINTS;
 DROP TABLE vlastnictvi CASCADE CONSTRAINTS;
 DROP TABLE propujcka CASCADE CONSTRAINTS;
 
+DROP INDEX index_pocet_mrtvych_kocek;
+
 DROP MATERIALIZED VIEW pohled;
 
 --
@@ -430,25 +432,22 @@ FROM kocka k INNER JOIN vyskyt v  ON k.id = v.id INNER JOIN teritorium t ON v.id
 WHERE v.od >= DATE '2020-01-01'
 */
 
+
 -- Vytvoření explicit "index"
 -- + dotaz SQL
---  lze kombinovat s "explain plan"
+--   lze kombinovat s "explain plan"
 --   spojení 2 tabulek, agregační funkce, group by
+CREATE INDEX index_pocet_mrtvych_kocek ON zivot(konec);
 
 -- dotaz: počet koček, které umřeli
 -- tabulka: kočka, život
-
-
---DROP INDEX index_pocet_mrtvych_kocek;
-
 EXPLAIN PLAN FOR
-    SELECT count(*) as pocet_mrtvych_kocek
-    FROM kocka k left join zivot z on k.id = z.id
-    WHERE z.konec is not null
+    SELECT count(*) AS pocet_mrtvych_kocek
+    FROM kocka k LEFT JOIN zivot z ON k.id = z.id
+    WHERE z.konec IS NOT NULL
     GROUP BY z.konec;
-SELECT plan_table_output FROM table (dbms_xplan.display());
+SELECT plan_table_output FROM TABLE (dbms_xplan.display());
 
-CREATE INDEX index_pocet_mrtvych_kocek ON zivot(konec);
 
 -- Definice přístupových práv k databázovým objektům pro druhého člena týmu
 -- TABLES:
