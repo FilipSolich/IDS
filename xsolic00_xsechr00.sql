@@ -10,6 +10,11 @@
 --
 -- Drop everything
 --
+
+DROP INDEX index_pocet_mrtvych_kocek;
+
+DROP MATERIALIZED VIEW pohled;
+
 DROP SEQUENCE kocka_id_seq;
 DROP SEQUENCE hostitel_id_seq;
 DROP SEQUENCE zivot_id_seq;
@@ -28,10 +33,6 @@ DROP TABLE zivot CASCADE CONSTRAINTS;
 DROP TABLE vyskyt CASCADE CONSTRAINTS;
 DROP TABLE vlastnictvi CASCADE CONSTRAINTS;
 DROP TABLE propujcka CASCADE CONSTRAINTS;
-
-DROP INDEX index_pocet_mrtvych_kocek;
-
-DROP MATERIALIZED VIEW pohled;
 
 
 --
@@ -128,7 +129,7 @@ CREATE TABLE teritorium (
 );
 
 CREATE TABLE vec (
-    id INT,-- DEFAULT vec_id_seq.NEXTVAL,
+    id INT,
     druh VARCHAR(30) NOT NULL,
     pocet INT,
     teritorium INT NOT NULL
@@ -176,14 +177,14 @@ CREATE OR REPLACE TRIGGER check_zivot_start
         THEN
             :NEW.zacatek := CURRENT_DATE;
         END IF;
-        IF :NEW.konec is not null
+        IF :NEW.konec IS NOT NULL
         THEN
             IF :NEW.konec > CURRENT_DATE
             THEN
                 :NEW.konec := CURRENT_DATE;
             END IF;
         END IF;
-        IF :NEW.konec is not null
+        IF :NEW.konec IS NOT NULL
         THEN
             IF :NEW.zacatek > :NEW.konec
             THEN
@@ -200,24 +201,26 @@ CREATE OR REPLACE TRIGGER check_zivot_start
 -- Procedura, která vypíše hostitele, které mají špatně zadané PSČ
 -- tabulka: hostitel:
 -- atribut: psc(int)
-CREATE OR REPLACE PROCEDURE hostitele_spatne_psc as
-CURSOR hostitele is select * from hostitel;
+CREATE OR REPLACE PROCEDURE hostitele_spatne_psc AS
+CURSOR hostitele IS SELECT * FROM hostitel;
 
 h hostitele%ROWTYPE;
 BEGIN
-    dbms_output.put_line('Hostitele se spatnym PSC : ');
-    open hostitele;
-        loop
-           fetch hostitele  into h; --nacteni prvniho radku
-           exit when hostitele%NOTFOUND;
-           if not REGEXP_LIKE (h.psc,'^[0-9][0-9][0-9][0-9][0-9]$')
-               then
-               dbms_output.put_line('Hostitel: ' || h.jmeno || ' Vek: ' ||  h.vek || ' Pohlavi: ' || h.pohlavi || ' Jmeno pro kocku:' || h.jmeno_pro_kocku|| ' Adresa: ' || h.ulice || ' ' || h.cislo_popisne );
-               dbms_output.put_line(' SPATNE PSC: '|| h.psc );
-            end if;
-        end loop;
+    dbms_output.put_line('Hostitele se spatnym PSC:');
+    OPEN hostitele;
+        LOOP
+            FETCH hostitele INTO h;
+            exit WHEN hostitele%NOTFOUND;
+            IF NOT REGEXP_LIKE (h.psc,'^[0-9][0-9][0-9][0-9][0-9]$')
+                THEN
+                dbms_output.put_line('Hostitel: ' || h.jmeno || ' Vek: ' ||  h.vek || ' Pohlavi: ' || h.pohlavi ||
+                                    ' Jmeno pro kocku: ' || h.jmeno_pro_kocku|| ' Adresa: ' || h.ulice ||
+                                    ' ' || h.cislo_popisne);
+                dbms_output.put_line('SPATNE PSC: '|| h.psc );
+            END IF;
+        END LOOP;
     CLOSE hostitele;
-end;
+END;
 
 -- Procedura, která vypíše jméno a rasu první kočky
 -- tabulka: kocka, rasa
@@ -398,19 +401,22 @@ COMMIT;
 -- SELECT
 --
 
-/*
 -- Vyhledá kočky a kolik mají služebnictva.
-SELECT k.hlavni_jmeno as "Kočka", COUNT(h.jmeno) as "Počet služebnictva"
+SELECT k.hlavni_jmeno AS "Kočka", COUNT(h.jmeno) AS "Počet služebnictva"
 FROM kocka k LEFT JOIN hostitel h ON k.id = h.kocka
 GROUP BY k.hlavni_jmeno;
 
 -- Vyhledá ID a druh teritorií, ve kterých je alespoň jedna věc minimálně 5 krát.
-SELECT t.id as "ID teritoria", t.druh as "Druh teritoria"
+SELECT t.id AS "ID teritoria", t.druh AS "Druh teritoria"
 FROM teritorium t
-WHERE EXISTS (SELECT id FROM vec v WHERE v.teritorium = t.id AND v.pocet >= 5);
+WHERE EXISTS (
+    SELECT id
+    FROM vec v
+    WHERE v.teritorium = t.id AND v.pocet >= 5
+);
 
 -- Sečtěte počet koček, které se vyskytují nebo vyskytovali v teritoriu s názvem "Komunistická"
-SELECT count(hlavni_jmeno) AS Počet_koček
+SELECT count(hlavni_jmeno) AS "Počet_koček"
 FROM KOCKA INNER JOIN VYSKYT USING(id)
 WHERE teritorium IN (
     SELECT id
@@ -419,15 +425,14 @@ WHERE teritorium IN (
 );
 
 -- Seraď rasy koček podle oblibeností hostitelů a vypište země původu a body jejich oblíbenosti
-SELECT MAX(H.preferovana_rasa) AS Název_rasy,R.puvod AS Země_půvou,COUNT(preferovana_rasa) AS body_oblíbenosti
+SELECT MAX(H.preferovana_rasa) AS "Název_rasy", R.puvod AS "Země_půvou" ,COUNT(preferovana_rasa) AS "Body_oblíbenosti"
 FROM RASA R LEFT JOIN HOSTITEL H ON R.nazev = H.preferovana_rasa
 GROUP BY H.preferovana_rasa,R.puvod;
 
 -- Vyberte kočky, které žijí v teritoriu od roku 2020 a vypište druh teritoria, ve kterém je kočka a datum jejich nastěhování
-SELECT k.hlavni_jmeno AS Jméno_kočky,t.druh AS Druh_teritoria,v.od AS Datum_přistěhování
-FROM kocka k INNER JOIN vyskyt v  ON k.id = v.id INNER JOIN teritorium t ON v.id = t.id
-WHERE v.od >= DATE '2020-01-01'
-*/
+SELECT k.hlavni_jmeno AS "Jméno_kočky", t.druh AS "Druh_teritoria", v.od AS "Datum_přistěhování"
+FROM kocka k INNER JOIN vyskyt v ON k.id = v.id INNER JOIN teritorium t ON v.id = t.id
+WHERE v.od >= DATE '2020-01-01';
 
 
 -- Vytvoření explicit "index"
@@ -467,12 +472,12 @@ CREATE MATERIALIZED VIEW pohled AS
     FROM kocka k LEFT JOIN hostitel h ON k.id = h.kocka
     WHERE k.barva_srsti = 'ČERVENÁ';
 
--- Volani procedur:
+-- Volání procedur:
 BEGIN
     hostitele_spatne_psc();
     prvni_kocka();
 END;
 
--- Pouzití pohledu
+-- Použití pohledu
 SELECT *
 FROM pohled;
